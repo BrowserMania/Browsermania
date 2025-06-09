@@ -1,100 +1,80 @@
-<div id="top">
+# 🌐 BROWSERMANIA
 
-<!-- STYLE D'EN-TÊTE : CLASSIQUE -->
-<div align="center">
+![Logo](Browsermania.png)
 
-<img src="Browsermania.png" width="30%" style="position: relative; top: 0; right: 0;" alt="Logo du projet"/>
+*Solution de navigation web isolée*
 
-# BROWSERMANIA
-
-<em>Libérez votre parcours  avec une orchestration sans effort.</em>
-
-<!-- BADGES -->
-<img src="https://img.shields.io/github/last-commit/sony-level/Browsermania?style=flat&logo=git&logoColor=white&color=0080ff" alt="dernier-commit">
-<img src="https://img.shields.io/github/languages/top/sony-level/Browsermania?style=flat&color=0080ff" alt="langage-principal-repo">
-<img src="https://img.shields.io/github/languages/count/sony-level/Browsermania?style=flat&color=0080ff" alt="nombre-langages-repo">
-
-<em>Construit avec les outils et technologies :</em>
-
-<img src="https://img.shields.io/badge/Markdown-000000.svg?style=flat&logo=Markdown&logoColor=white" alt="Markdown">
-<img src="https://img.shields.io/badge/GNU%20Bash-4EAA25.svg?style=flat&logo=GNU-Bash&logoColor=white" alt="GNU%20Bash">
-<img src="https://img.shields.io/badge/YAML-CB171E.svg?style=flat&logo=YAML&logoColor=white" alt="YAML">
-
-</div>
-<br>
+![dernier-commit](https://img.shields.io/github/last-commit/sony-level/Browsermania?style=flat&logo=git&logoColor=white&color=0080ff)
+![langage-principal-repo](https://img.shields.io/github/languages/top/sony-level/Browsermania?style=flat&color=0080ff)
+![nombre-langages-repo](https://img.shields.io/github/languages/count/sony-level/Browsermania?style=flat&color=0080ff)
 
 ---
 
-## 📄 Table des matières
+## 🧭 Browsermania : solution de navigation web isolée
+
+**Browsermania** est une solution de navigation web **sécurisée, isolée et orchestrée**.
+
+Chaque session navigateur est exécutée dans un **conteneur dédié et cloisonné**, contrôlé via Kubernetes, avec accès distant par **WebRTC** .
+
+### ✅ Principaux atouts
+
+- 🔐 Navigation web **conteneurisée, isolée et temporaire**
+- 🌐 Accès distant via **WebRTC**, sans exposition réseau
+- 🧱 Cloisonnement réseau avec **Cilium**
+- 🔑 Authentification centralisée avec **Keycloak**
+- 🚀 Déploiement complet d’une stack backend/frontend
+
+---
+
+## 📚 Table des matières
 
 - [Présentation](#-présentation)
 - [Démarrage rapide](#-démarrage-rapide)
     - [Prérequis](#-prérequis)
     - [Installation](#-installation)
-    - [Utilisation](#-utilisation)
-    - [Tests](#-tests)
+    - [Configuration du cluster](#-configuration-du-cluster)
+- [Tests](#-tests)
+- [Sécurité et bonnes pratiques](#-sécurité-et-bonnes-pratiques)
+- [Licence](#-licence)
 
 ---
 
 ## ✨ Présentation
 
-Browsermania est votre outil incontournable pour lancer et gérer facilement des clusters Kubernetes avec des technologies de pointe.
+Browsermania est un projet DevSecOps qui permet de déployer :
 
-**Pourquoi Browsermania ?**
+- Un backend sécurisé (API REST) 
+- Un frontend React configuré 
+- Un Serveur WebRTC pour accès distant de navigateur conteneurisé. 
+- Un environnement Kubernetes complet (MetalLB, Cilium, stockage...)
 
-Ce projet simplifie le déploiement d'environnements d'orchestration de conteneurs robustes, permettant aux développeurs de se concentrer sur la création d'applications plutôt que sur la gestion de l'infrastructure. Les fonctionnalités principales incluent :
-
-- 🚀 **Installation automatisée de Kubernetes :** Simplifie la configuration et réduit les erreurs manuelles.
-- 🛡️ **Intégration de Containerd et Cilium :** Améliore les performances et la sécurité avec un runtime moderne et des solutions réseau avancées.
-- ⚖️ **Répartition de charge avec MetalLB :** Gère efficacement la distribution du trafic et l'attribution d'IP pour vos applications.
-- 💾 **Stockage persistant pour MySQL :** Garantit la persistance des données pour les applications à état, essentiel pour la fiabilité.
-- 🌐 **Déploiement complet de la stack applicative :** Déploie rapidement une API backend et une application frontend, accélérant la productivité des développeurs.
+> Le nom *Browsermania* exprime une volonté de **maîtrise complète** des sessions de navigation dans des contextes distribués, où la sécurité et l’isolation sont essentielles.
 
 ---
-
 ## 🚀 Démarrage rapide
 
 ### 📋 Prérequis
 
-Ce projet nécessite les dépendances suivantes :
-
-- **Langage de programmation :** Shell
-- **Gestionnaire de paquets :** Bash
+- OS : Ubuntu/Debian
+- kata-container installer
+- Accès root ou `sudo`
+- Internet
+- `minikube` ou `kubeadm`
+- Docker ou Containerd
 
 ### ⚙️ Installation
 
-Construisez Browsermania à partir des sources et installez les dépendances :
-
-1. **Clonez le dépôt :**
-
-    ```sh
-    ❯ git clone https://github.com/sony-level/Browsermania
-    ```
-
-2. **Accédez au dossier du projet :**
-
-    ```sh
-    ❯ cd Browsermania
-    ```
-
-3. **Installez les dépendances :**
-
-**Avec [bash](https://www.gnu.org/software/bash/) :**
-
-```sh
-❯ chmod +x launch.sh
+```bash
+git clone https://github.com/sony-level/Browsermania
+cd Browsermania
 ````
-### Script de configuration d'un cluster Kubernetes avec Containerd, Cilium et Cilium CLI
+### 🧰 Configuration du cluster
+
+Script de configuration d'un cluster Kubernetes avec Containerd, Cilium et Cilium CLI
 
 Ce script shell configure un nœud (maître ou worker) pour un cluster Kubernetes basé sur Containerd avec le CNI Cilium.
 
-## 🛠️ Pré-requis
-
-- Ubuntu/Debian
-- kata-container installer
-- Droits `sudo`
-
-## 📜 Script Bash
+#### 📜 Script Bash (extrait)
 
 ```bash
 #!/bin/bash
@@ -157,13 +137,21 @@ if [ "$1" == "master" ]; then
   sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
   sudo chown $(id -u):$(id -g) $HOME/.kube/config
 fi
-
 ```
+### Post-installation
 
 Une fois ce script executé et le cluster initialisé, lancer :
 ```bash
-    ❯ cilium install
-    ❯ kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.12/config/manifests/metallb-native.yaml (ou une version plus récente)
-    ❯ kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
+cilium install
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.12/config/manifests/metallb-native.yaml (ou une version plus récente)
+kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
+kubectl apply -f ./deploy_browsermania.yaml
 ```
-puis appliquer le fichier de deploiement .yaml.
+### 🧪 Tests
+Pour tester le déploiement, vous pouvez utiliser les commandes suivantes :
+
+```bash
+kubectl get pods 
+kubectl get svc
+```
+
