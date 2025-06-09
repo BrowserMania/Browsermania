@@ -189,4 +189,17 @@ kubectl get svc
 
 > **ℹ️ Important :** Les services de type `LoadBalancer` doivent être exposés via MetalLB et accessibles sur l'IP allouée.
 
+### 🎥 Démonstration vidéo
+
+Une démonstration vidéo de Browsermania est disponible ici :  
+👉 [Voir la démo](./demo.mp4)
+
+### 🛠️ Dépannage
+Si vous rencontrez des problèmes, voici quelques étapes de dépannage :
+- Vérifiez les logs des pods avec `kubectl logs <pod-name>`
+- Assurez-vous que les services sont correctement exposés avec `kubectl get svc`
+- Vérifiez l'état des pods avec `kubectl get pods -n kube-system`
+- Assurez-vous que Cilium est correctement installé avec `cilium status`
+- Vérifiez la configuration de MetalLB avec `kubectl get configmap -n metallb-system config`
+- Assurez-vous que les ports nécessaires sont ouverts dans votre pare-feu
 
