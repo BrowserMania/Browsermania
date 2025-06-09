@@ -41,14 +41,12 @@ Chaque session navigateur est exécutée dans un **conteneur dédié et cloisonn
 
 ## ✨ Présentation
 
-Browsermania est un projet DevSecOps qui permet de déployer :
+Browsermania est un projets qui permet de déployer :
 
-- Un backend sécurisé (API REST) 
-- Un frontend React configuré 
+- Un Interface web (frontend)  configuré 
+- Un Backend (API) pour la gestion des sessions de navigation
 - Un Serveur WebRTC pour accès distant de navigateur conteneurisé. 
 - Un environnement Kubernetes complet (MetalLB, Cilium, stockage...)
-
-> Le nom *Browsermania* exprime une volonté de **maîtrise complète** des sessions de navigation dans des contextes distribués, où la sécurité et l’isolation sont essentielles.
 
 ---
 ## 🚀 Démarrage rapide
