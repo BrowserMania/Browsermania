@@ -1,0 +1,115 @@
+#!/bin/bash
+
+# Script pour supprimer, nettoyer et reconstruire un cluster Minikube avec les répertoires hostPath et la configuration YAML
+
+# Étape 1 : Arrêter et supprimer le cluster Minikube existant
+echo "Arrêt et suppression du cluster Minikube..."
+minikube stop
+minikube delete
+
+# Étape 2 : Nettoyer les fichiers locaux de Minikube
+echo "Nettoyage des fichiers locaux de Minikube (~/.minikube)..."
+rm -rf ~/.minikube
+
+# Étape 3 : Vérifier que Docker est en cours d'exécution
+echo "Vérification du statut de Docker..."
+if ! sudo systemctl is-active --quiet docker; then
+    echo "Démarrage de Docker..."
+    sudo systemctl start docker
+else
+    echo "Docker est déjà en cours d'exécution."
+fi
+
+# Étape 4 : Démarrer un nouveau cluster Minikube
+echo "Démarrage d'un nouveau cluster Minikube..."
+minikube start --kubernetes-version=v1.33.1 --driver=docker --cpus=4 --memory=8192
+
+# Étape 5 : Vérifier le statut de Minikube
+echo "Vérification du statut de Minikube..."
+minikube status
+if [ $? -ne 0 ]; then
+    echo "Erreur : Minikube n'a pas démarré correctement. Arrêt du script."
+    exit 1
+fi
+
+# Étape 6 : Créer les répertoires hostPath dans la VM Minikube
+echo "Connexion à la VM Minikube pour créer les répertoires hostPath..."
+minikube ssh -- "sudo mkdir -p  /mnt/data/mysql  /tmp/backapi-temp-data && sudo chmod -R 777 /mnt/data/mysql /tmp/backapi-temp-data"
+if [ $? -ne 0 ]; then
+    echo "Erreur : Échec de la création des répertoires hostPath dans Minikube."
+    exit 1
+else
+    echo "Répertoires   /mnt/data/mysql et /tmp/backapi-temp-data créés avec succès."
+fi
+
+# Étape 7 : Vérifier et nettoyer les PVCs et PVs existants
+echo "Nettoyage des PVCs et PVs existants..."
+kubectl delete pvc mysql-pvc backapi-temp-pvc --ignore-not-found
+kubectl delete pv mysql-pv backapi-pv-temp --ignore-not-found
+if [ $? -ne 0 ]; then
+    echo "Erreur : Échec de la suppression des PVCs et PVs."
+    exit 1
+else
+    echo "PVCs et PVs supprimés avec succès."
+fi
+
+# Étape 9 : Installer MetalLB pour les services LoadBalancer
+echo "Installation de MetalLB..."
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
+if [ $? -ne 0 ]; then
+    echo "Erreur : Échec de l'installation de MetalLB."
+    exit 1
+fi
+
+
+
+# Étape 10 : Vérifier les images Docker
+            # echo "Vérification des images Docker..."
+            # for image in badr2/finalebacknd:latest2 badr2/finalefrontend:dynamic3 mysql:8; do
+            #     if ! docker image inspect $image > /dev/null 2>&1; then
+            #         echo "Image $image non trouvée localement, tentative de pull..."
+            #         if ! docker pull $image; then
+            #             echo "Avertissement : Impossible de récupérer l'image $image depuis Docker Hub. Chargement local requis si nécessaire."
+            #         else
+            #             echo "Image $image récupérée avec succès."
+            #             minikube image load $image
+            #         fi
+            #     else
+            #         echo "Image $image déjà présente localement."
+            #         minikube image load $image
+            #     fi
+            # done
+
+# Étape 11 : Appliquer la configuration YAML
+echo "Application de la configuration YAML..."
+kubectl apply -f ./deploy_browsermania.yaml
+if [ $? -ne 0 ]; then
+    echo "Erreur : Échec de l'application de la configuration YAML."
+    exit 1
+fi
+
+# Étape 12 : Vérifier les ressources
+echo "Vérification des PVCs..."
+kubectl get pvc
+echo "Vérification des pods..."
+kubectl get pods
+echo "Vérification des services..."
+kubectl get svc
+echo "Vérification des PVs..."
+kubectl get pv
+
+
+# Étape 13 : Tester la connectivité
+
+# echo "Test de la connectivité des services..."
+# BACKAPI_URL=$(minikube service backapi-service --url)
+# FRONTEND_URL=$(minikube service frontend-service --url)
+# echo "URL du service backend : $BACKAPI_URL"
+# echo "URL du service frontend : $FRONTEND_URL"
+
+echo "Test de la connectivité MySQL..."
+kubectl exec -it mysql -- mysql -uroot -prootpassword -e "SHOW DATABASES;" || {
+    echo "Erreur : Échec de la connexion à MySQL. Vérifiez les logs avec : kubectl logs mysql"
+}
+
+echo "Déploiement terminé ! Vérifiez les URLs ci-dessus et les logs des pods si nécessaire."

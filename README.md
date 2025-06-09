@@ -1,15 +1,114 @@
-# Script de configuration d'un cluster Kubernetes avec Containerd, Cilium et Cilium CLI
+#           # 🌐 Browsermania
 
-Ce script shell configure un nœud (maître ou worker) pour un cluster Kubernetes basé sur Containerd avec le CNI Cilium.
+> Solution de navigation web isolée, sécurisée et orchestrée via Kubernetes.
 
-## 🛠️ Pré-requis
+---
 
-- Ubuntu/Debian
-- kata-container installer
-- Droits `sudo`
+## 🧭 Présentation
 
-## 📜 Script Bash
+**Browsermania** est une solution de navigation web sécurisée, isolée et orchestrée. Chaque session de navigation est exécutée dans un conteneur dédié, contrôlé via Kubernetes, et accessible à distance via WebRTC. Le projet intègre **Cilium** pour le cloisonnement réseau et **MetalLB** pour le load balancing.
 
+### ✅ Principaux atouts
+
+- 🔐 Navigation web conteneurisée et isolée
+- 🌐 Accès distant via WebRTC
+- 🧱 Cloisonnement réseau avec Cilium
+- 🚀 Déploiement complet d’une stack backend/frontend
+
+---
+
+## 📚 Table des matières
+
+- [Présentation](#-présentation)
+- [Démarrage rapide](#-démarrage-rapide)
+    - [Prérequis](#prérequis)
+    - [Installation](#installation)
+    - [Configuration du cluster](#configuration-du-cluster)
+        - [Option 1 : Minikube](#option-1--minikube)
+        - [Option 2 : Kubeadm](#option-2--kubeadm)
+- [Tests](#tests)
+- [Dépannage](#dépannage)
+
+---
+
+## 🚀 Démarrage rapide
+
+### Prérequis
+
+- OS : Ubuntu ou Debian
+- Accès root ou sudo
+- Outils :
+    - Minikube ou Kubeadm
+    - Docker ou Containerd
+    - `kubectl`
+    - Paquets : `curl`, `apt-transport-https`, `ca-certificates`, `software-properties-common`
+- Connexion Internet active
+
+---
+
+### Installation
+
+```bash
+git clone https://github.com/sony-level/Browsermania
+cd Browsermania
+
+````
+## ⚙️ Configuration du cluster
+
+### Option 1 : Minikube
+
+0. **configuration via le script d'installation**  
+   Vous pouvez utiliser le script bash fourni pour configurer un cluster Kubernetes avec Minikube,  et MetalLB.  
+   👉 [https://github.com/sony-level/Browsermania/blob/main/buil_with_minikube](https://github.com/sony-level/Browsermania/blob/main/build_with_minikube)
+
+1. **Installation de Minikube**  
+   Consultez la documentation officielle :  
+   👉 [https://minikube.sigs.k8s.io/docs/start/](https://minikube.sigs.k8s.io/docs/start/)
+
+2. **Démarrage avec Containerd**
+```bash
+minikube start --driver=docker --container-runtime=containerd --network-plugin=cni \
+--extra-config=kubelet.container-runtime-endpoint=unix:///var/run/containerd/containerd.sock
+```
+3. **Installation de Cilium CLI**
+   ```bash
+   curl -L --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
+   sha256sum --check cilium-linux-${CLI_ARCH}.tar.gz.sha256sum
+   sudo tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz /usr/local/bin
+   rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
+   ```
+`4. **Installation de Cilium dans Minikube**
+   ```bash
+   cilium install
+   ```
+5. **Installation de MetalLB**
+   ```bash
+   kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.12/config/manifests/metallb-native.yaml
+   ```
+6. **Configuration de MetalLB**
+   ```bash
+   kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
+   ```
+7. **Déploiement de Browsermania**
+   ```bash
+   kubectl apply -f ./deploy_browsermania.yaml
+   ```
+8. **Vérification du déploiement**
+   ```bash
+   kubectl get pods
+   kubectl get svc
+   ``` 
+### Option 2 : Kubeadm
+1. **Installation de Kubeadm, Kubelet et Kubectl**
+   Suivez les instructions officielles :  
+   👉 [https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
+
+ou 
+2. **Utilisation du script d'installation**
+   Vous pouvez utiliser le script bash fourni pour configurer un cluster Kubernetes avec containerd, Cilium et Cilium CLI.  
+   👉 [https://github.com/sony-level/Browsermania/blob/main/buil_with_kubedm](https://github.com/sony-level/Browsermania/blob/main/buil_with_kubedm)
+
+#### 📜 Script Bash (extrait)
 ```bash
 #!/bin/bash
 # Script pour configurer un cluster Kubernetes avec containerd, Cilium et Cilium CLI
@@ -71,9 +170,24 @@ if [ "$1" == "master" ]; then
   sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
   sudo chown $(id -u):$(id -g) $HOME/.kube/config
 fi
+``
 
 Une fois ce script executé et le cluster initialisé, lancer :
+```bash
 cilium install
 kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.12/config/manifests/metallb-native.yaml (ou une version plus récente)
 kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
-puis appliquer le fichier de deploiement .yaml
+kubectl apply -f ./deploy_browsermania.yaml
+```
+### 🧪 Tests
+Pour tester le déploiement, vous pouvez utiliser les commandes suivantes :
+
+```bash
+kubectl get pods 
+kubectl get svc
+```
+
+> **ℹ️ Important :** Les services de type `LoadBalancer` doivent être exposés via MetalLB et accessibles sur l'IP allouée.
+
+
+
