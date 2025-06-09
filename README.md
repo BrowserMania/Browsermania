@@ -190,4 +190,3 @@ kubectl get svc
 > **ℹ️ Important :** Les services de type `LoadBalancer` doivent être exposés via MetalLB et accessibles sur l'IP allouée.
 
 
-
