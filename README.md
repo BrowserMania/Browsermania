@@ -18,10 +18,9 @@ Chaque session navigateur est exécutée dans un **conteneur dédié et cloisonn
 
 ### ✅ Principaux atouts
 
-- 🔐 Navigation web **conteneurisée, isolée et temporaire**
-- 🌐 Accès distant via **WebRTC**, sans exposition réseau
+- 🔐 Navigation web **conteneurisée, isolée **
+- 🌐 Accès distant via **WebRTC**
 - 🧱 Cloisonnement réseau avec **Cilium**
-- 🔑 Authentification centralisée avec **Keycloak**
 - 🚀 Déploiement complet d’une stack backend/frontend
 
 ---
