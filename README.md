@@ -191,9 +191,8 @@ kubectl get svc
 
 ### 🎥 Démonstration vidéo
 
-<video src="./demo.mp4" controls width="600">
-  Votre navigateur ne prend pas en charge la balise vidéo.
-</video>
+Une démonstration vidéo de Browsermania est disponible ici :  
+👉 [Voir la démo](./demo.mp4)
 
 ### 🛠️ Dépannage
 Si vous rencontrez des problèmes, voici quelques étapes de dépannage :
