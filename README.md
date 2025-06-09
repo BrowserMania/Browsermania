@@ -26,11 +26,7 @@
     - [Configuration du cluster](#configuration-du-cluster)
         - [Option 1 : Minikube](#option-1--minikube)
         - [Option 2 : Kubeadm](#option-2--kubeadm)
-    - [Post-installation](#post-installation)
 - [Tests](#tests)
-- [Sécurité et bonnes pratiques](#sécurité-et-bonnes-pratiques)
-- [Licence](#licence)
-- [Structure des scripts](#structure-des-scripts)
 - [Dépannage](#dépannage)
 
 ---
@@ -63,7 +59,7 @@ cd Browsermania
 
 0. **configuration via le script d'installation**  
    Vous pouvez utiliser le script bash fourni pour configurer un cluster Kubernetes avec Minikube,  et MetalLB.  
-   👉 [https://github.com/sony-level/Browsermania/blob/main/buil_with_minikube](https://github.com/sony-level/Browsermania/blob/main/buil_with_minikube)
+   👉 [https://github.com/sony-level/Browsermania/blob/main/buil_with_minikube](https://github.com/sony-level/Browsermania/blob/main/build_with_minikube)
 
 1. **Installation de Minikube**  
    Consultez la documentation officielle :  
@@ -190,4 +186,8 @@ Pour tester le déploiement, vous pouvez utiliser les commandes suivantes :
 kubectl get pods 
 kubectl get svc
 ```
+
+> **ℹ️ Important :** Les services de type `LoadBalancer` doivent être exposés via MetalLB et accessibles sur l'IP allouée.
+
+
 
