@@ -1,26 +1,18 @@
-# 🌐 BROWSERMANIA
+#           # 🌐 Browsermania
 
-![Logo](Browsermania.png)
-
-*Solution de navigation web isolée*
-
-![dernier-commit](https://img.shields.io/github/last-commit/sony-level/Browsermania?style=flat&logo=git&logoColor=white&color=0080ff)
-![langage-principal-repo](https://img.shields.io/github/languages/top/sony-level/Browsermania?style=flat&color=0080ff)
-![nombre-langages-repo](https://img.shields.io/github/languages/count/sony-level/Browsermania?style=flat&color=0080ff)
+> Solution de navigation web isolée, sécurisée et orchestrée via Kubernetes.
 
 ---
 
-## 🧭 Browsermania : solution de navigation web isolée
+## 🧭 Présentation
 
-**Browsermania** est une solution de navigation web **sécurisée, isolée et orchestrée**.
-
-Chaque session navigateur est exécutée dans un **conteneur dédié et cloisonné**, contrôlé via Kubernetes, avec accès distant par **WebRTC** .
+**Browsermania** est une solution de navigation web sécurisée, isolée et orchestrée. Chaque session de navigation est exécutée dans un conteneur dédié, contrôlé via Kubernetes, et accessible à distance via WebRTC. Le projet intègre **Cilium** pour le cloisonnement réseau et **MetalLB** pour le load balancing.
 
 ### ✅ Principaux atouts
 
-- 🔐 Navigation web **conteneurisée, isolée**
-- 🌐 Accès distant via **WebRTC**
-- 🧱 Cloisonnement réseau avec **Cilium**
+- 🔐 Navigation web conteneurisée et isolée
+- 🌐 Accès distant via WebRTC
+- 🧱 Cloisonnement réseau avec Cilium
 - 🚀 Déploiement complet d’une stack backend/frontend
 
 ---
@@ -29,50 +21,98 @@ Chaque session navigateur est exécutée dans un **conteneur dédié et cloisonn
 
 - [Présentation](#-présentation)
 - [Démarrage rapide](#-démarrage-rapide)
-    - [Prérequis](#-prérequis)
-    - [Installation](#-installation)
-    - [Configuration du cluster](#-configuration-du-cluster)
-- [Tests](#-tests)
-- [Sécurité et bonnes pratiques](#-sécurité-et-bonnes-pratiques)
-- [Licence](#-licence)
+    - [Prérequis](#prérequis)
+    - [Installation](#installation)
+    - [Configuration du cluster](#configuration-du-cluster)
+        - [Option 1 : Minikube](#option-1--minikube)
+        - [Option 2 : Kubeadm](#option-2--kubeadm)
+    - [Post-installation](#post-installation)
+- [Tests](#tests)
+- [Sécurité et bonnes pratiques](#sécurité-et-bonnes-pratiques)
+- [Licence](#licence)
+- [Structure des scripts](#structure-des-scripts)
+- [Dépannage](#dépannage)
 
 ---
 
-## ✨ Présentation
-
-Browsermania est un projets qui permet de déployer :
-
-- Un Interface web (frontend)  configuré 
-- Un Backend (API) pour la gestion des sessions de navigation
-- Un Serveur WebRTC pour accès distant de navigateur conteneurisé. 
-- Un environnement Kubernetes complet (MetalLB, Cilium, stockage...)
-
----
 ## 🚀 Démarrage rapide
 
-### 📋 Prérequis
+### Prérequis
 
-- OS : Ubuntu/Debian
-- kata-container installer
-- Accès root ou `sudo`
-- Internet
-- `minikube` ou `kubeadm`
-- Docker ou Containerd
+- OS : Ubuntu ou Debian
+- Accès root ou sudo
+- Outils :
+    - Minikube ou Kubeadm
+    - Docker ou Containerd
+    - `kubectl`
+    - Paquets : `curl`, `apt-transport-https`, `ca-certificates`, `software-properties-common`
+- Connexion Internet active
 
-### ⚙️ Installation
+---
+
+### Installation
 
 ```bash
 git clone https://github.com/sony-level/Browsermania
 cd Browsermania
+
 ````
-### 🧰 Configuration du cluster
+## ⚙️ Configuration du cluster
 
-Script de configuration d'un cluster Kubernetes avec Containerd, Cilium et Cilium CLI
+### Option 1 : Minikube
 
-Ce script shell configure un nœud (maître ou worker) pour un cluster Kubernetes basé sur Containerd avec le CNI Cilium.
+0. **configuration via le script d'installation**  
+   Vous pouvez utiliser le script bash fourni pour configurer un cluster Kubernetes avec Minikube,  et MetalLB.  
+   👉 [https://github.com/sony-level/Browsermania/blob/main/buil_with_minikube](https://github.com/sony-level/Browsermania/blob/main/buil_with_minikube)
+
+1. **Installation de Minikube**  
+   Consultez la documentation officielle :  
+   👉 [https://minikube.sigs.k8s.io/docs/start/](https://minikube.sigs.k8s.io/docs/start/)
+
+2. **Démarrage avec Containerd**
+```bash
+minikube start --driver=docker --container-runtime=containerd --network-plugin=cni \
+--extra-config=kubelet.container-runtime-endpoint=unix:///var/run/containerd/containerd.sock
+```
+3. **Installation de Cilium CLI**
+   ```bash
+   curl -L --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
+   sha256sum --check cilium-linux-${CLI_ARCH}.tar.gz.sha256sum
+   sudo tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz /usr/local/bin
+   rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
+   ```
+`4. **Installation de Cilium dans Minikube**
+   ```bash
+   cilium install
+   ```
+5. **Installation de MetalLB**
+   ```bash
+   kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.12/config/manifests/metallb-native.yaml
+   ```
+6. **Configuration de MetalLB**
+   ```bash
+   kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
+   ```
+7. **Déploiement de Browsermania**
+   ```bash
+   kubectl apply -f ./deploy_browsermania.yaml
+   ```
+8. **Vérification du déploiement**
+   ```bash
+   kubectl get pods
+   kubectl get svc
+   ``` 
+### Option 2 : Kubeadm
+1. **Installation de Kubeadm, Kubelet et Kubectl**
+   Suivez les instructions officielles :  
+   👉 [https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
+
+ou 
+2. **Utilisation du script d'installation**
+   Vous pouvez utiliser le script bash fourni pour configurer un cluster Kubernetes avec containerd, Cilium et Cilium CLI.  
+   👉 [https://github.com/sony-level/Browsermania/blob/main/buil_with_kubedm](https://github.com/sony-level/Browsermania/blob/main/buil_with_kubedm)
 
 #### 📜 Script Bash (extrait)
-
 ```bash
 #!/bin/bash
 # Script pour configurer un cluster Kubernetes avec containerd, Cilium et Cilium CLI
@@ -134,8 +174,7 @@ if [ "$1" == "master" ]; then
   sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
   sudo chown $(id -u):$(id -g) $HOME/.kube/config
 fi
-```
-### Post-installation
+``
 
 Une fois ce script executé et le cluster initialisé, lancer :
 ```bash
