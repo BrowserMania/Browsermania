@@ -9,7 +9,9 @@ sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 sudo apt install -y curl apt-transport-https ca-certificates software-properties-common
 
 echo "Activation de l'IP forwarding..."
+# Appliquer immédiatement
 sudo sysctl -w net.ipv4.ip_forward=1
+# Rendre persistant
 echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf
 sudo sysctl -p
 
@@ -30,6 +32,7 @@ echo "Installation de kubeadm, kubelet et kubectl..."
 sudo apt-get install -y kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
 
+# 🔧 Ajout de la configuration pour kubelet avec containerd
 echo "Configuration de kubelet pour utiliser containerd..."
 cat <<EOF | sudo tee /etc/default/kubelet
 KUBELET_EXTRA_ARGS=--container-runtime-endpoint=unix:///var/run/containerd/containerd.sock
@@ -49,7 +52,7 @@ sha256sum --check cilium-linux-${CLI_ARCH}.tar.gz.sha256sum
 sudo tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz /usr/local/bin
 rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
 
-# Initialisation uniquement sur le nœud maître
+# Exécuter uniquement sur le nœud maître
 if [ "$1" == "master" ]; then
   echo "Initialisation du nœud maître Kubernetes..."
   sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --cri-socket unix:///var/run/containerd/containerd.sock
@@ -58,3 +61,7 @@ if [ "$1" == "master" ]; then
   sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
   sudo chown $(id -u):$(id -g) $HOME/.kube/config
 fi
+
+cilium install
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.12/config/manifests/metallb-native.yaml
+kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
